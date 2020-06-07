@@ -162,6 +162,21 @@ namespace XyzCpp {
 			send(payload, type);
 		}
 
+		void send (const std::byte* data, size_t length, int type=0) {
+			try {
+				std::vector<std::byte> payload = XyzMessageBuilder()
+					.add(XyzUtils::deflate(data, length), type)
+					.toVector();
+
+				client.writeAsync(boost::asio::buffer(payload), [this] (boost::system::error_code ec, size_t length) {
+					if (ec) {
+						this->resetState();
+						this->invokeOnDisconnect();
+					}
+				});
+			} catch (...) {} // TODO: handle error?
+		}
+
 		void sendSync (std::vector<std::byte>& data, int type=0) {
 			sendSync(data.data(), data.size());
 		}
@@ -185,23 +200,6 @@ namespace XyzCpp {
 			sendSync(payload, type);
 		}
 
-		private:
-
-		void send (const std::byte* data, size_t length, int type=0) {
-			try {
-				std::vector<std::byte> payload = XyzMessageBuilder()
-					.add(XyzUtils::deflate(data, length), type)
-					.toVector();
-
-				client.writeAsync(boost::asio::buffer(payload), [this] (boost::system::error_code ec, size_t length) {
-					if (ec) {
-						this->resetState();
-						this->invokeOnDisconnect();
-					}
-				});
-			} catch (...) {} // TODO: handle error?
-		}
-
 		void sendSync (const std::byte* data, size_t length, int type=0) {
 			try {
 				std::vector<std::byte> payload = XyzMessageBuilder()
@@ -211,6 +209,9 @@ namespace XyzCpp {
 				client.writeSync(boost::asio::buffer(payload));
 			} catch (...) {}
 		}
+
+
+		private:
 
 		void readLength () {
 			state = State::Length;

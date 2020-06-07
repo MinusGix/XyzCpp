@@ -36,6 +36,10 @@ test_client = executable('test_client', sources : ['src/test_client.cpp'], depen
 test('test_client', test_client)
 test_server = executable('test_server', sources : ['src/test_server.cpp'], dependencies : deps)
 test('test_server', test_server)
+test_udp_client = executable('test_udp_client', sources : ['src/test_udp_client.cpp'], dependencies : deps)
+test('test_udp_client', test_udp_client)
+test_udp_server = executable('test_udp_server', sources : ['src/test_udp_server.cpp'], dependencies : deps)
+test('test_udp_server', test_udp_server)
 libxyzcpp_dep = declare_dependency(
     include_directories : include_directories('include'),
     dependencies : deps
