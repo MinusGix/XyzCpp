@@ -98,20 +98,14 @@ int main (int argc, char** argv) {
 		std::cout << "Failed to connect\n";
 	}
 
-	//char line[41];
-	//while (std::cin.getline(line, 40)) {
-	//	std::cout << line << "\n";
-	//}
-
-	//std::cout << "Thread: " << t.get_id() << ", joinable: " << t.joinable() << "\n";
-	char* value;
-	while ((value = readline("Input> "))) {
-		client.send(std::string(value), 0);
+	char line[2048];
+	while (std::cin.getline(line, 2048)) {
+		if (shared_key.size() != 0) {
+			client.send(XyzUtils::encrypt(reinterpret_cast<std::byte*>(line), strlen(line), shared_key.data(), shared_key.size()), 3);
+		} else {
+			std::cout << "Haven't exchange public keys\n";
+		}
 	}
-
-	//t.join();
-
-	//std::cout << "Thread: " << t.get_id() << ", joinable: " << t.joinable() << "\n";
 
 	return 0;
 }

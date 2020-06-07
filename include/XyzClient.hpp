@@ -17,10 +17,6 @@ namespace XyzCpp {
 	class TcpClient {
 		protected:
 
-		// Represents programs link to OS IO services
-		//boost::asio::io_service io_service;
-		//boost::asio::ip::tcp::socket socket;
-
 		// Has to be made shared so it can be 'moved'..
 		std::shared_ptr<boost::asio::io_context> io_context;
 		boost::asio::ip::tcp::resolver resolver;
@@ -35,8 +31,6 @@ namespace XyzCpp {
 		/// This constructor is made primarily for servers that are receiving a connection
 		explicit TcpClient (boost::asio::ip::tcp::socket&& t_socket) : io_context(std::make_shared<boost::asio::io_context>()), resolver(*io_context), socket(std::move(t_socket)), work(boost::asio::make_work_guard(*io_context)) {}
 		explicit TcpClient () : io_context(std::make_shared<boost::asio::io_context>()), resolver(*io_context), socket(*io_context), work(boost::asio::make_work_guard(*io_context)) {}
-		//explicit TcpClient (TcpClient&& o) :
-			//io_context(std::move(o.io_context)), resolver(std::move(o.resolver)), socket(std::move(o.socket)), work(std::move(o.work)), thread(std::move(o.thread)) {}
 
 		/// Connect to the [host] on [port]
 		/// Can throw a boost::system::system_error
@@ -135,7 +129,6 @@ namespace XyzCpp {
 				read();
 				return true;
 			} catch (std::exception& err) { // TODO: this is bad, since we don't properly showcase the error, but it's what the original does
-				std::cerr << err.what() << "\n";
 				invokeOnDisconnect();
 			}
 			return false;
@@ -195,27 +188,18 @@ namespace XyzCpp {
 		private:
 
 		void send (const std::byte* data, size_t length, int type=0) {
-			std::cout << "send: " << ((void*) data) << " len: " << length << " t: " << type << "\n";
 			try {
 				std::vector<std::byte> payload = XyzMessageBuilder()
 					.add(XyzUtils::deflate(data, length), type)
 					.toVector();
 
-				std::cout << "{ " << std::hex;
-				for (std::byte v : payload) {
-					std::cout << "0x" << static_cast<int>(v) << ", ";
-				}
-				std::cout << "}" << std::dec << "\n";
-				std::cout << "send payload size: " << payload.size() << "\n";
 				client.writeAsync(boost::asio::buffer(payload), [this] (boost::system::error_code ec, size_t length) {
 					if (ec) {
 						this->resetState();
 						this->invokeOnDisconnect();
 					}
 				});
-			} catch (...) { // TODO: handle error?
-				std::cerr << "Error in handling send\n";
-			}
+			} catch (...) {} // TODO: handle error?
 		}
 
 		void sendSync (const std::byte* data, size_t length, int type=0) {
@@ -223,26 +207,21 @@ namespace XyzCpp {
 				std::vector<std::byte> payload = XyzMessageBuilder()
 					.add(XyzUtils::deflate(data, length))
 					.toVector();
-				
+
 				client.writeSync(boost::asio::buffer(payload));
-			} catch (...) {
-				std::cout << "Error in handling sendSync\n";
-			}
+			} catch (...) {}
 		}
 
 		void readLength () {
-			std::cout << "readLength()\n";
 			state = State::Length;
 			assureBufferSize(length_size);
 			client.readAsync(boost::asio::buffer(temp_buffer.data(), length_size), [this] (boost::system::error_code ec, size_t length) {
-				std::cout << "receivedLengthPre\n";
 				this->receivedLength(ec, length);
 			});
 		}
 
 		void receivedLength (boost::system::error_code ec, size_t) {
 			if (ec) {
-				std::cout << ec << "\n";
 				handleReceiveError();
 				return;
 			}
@@ -263,7 +242,6 @@ namespace XyzCpp {
 
 		void receivedType (boost::system::error_code ec, size_t) {
 			if (ec) {
-				std::cout << ec << "\n";
 				handleReceiveError();
 				return;
 			}
@@ -299,7 +277,6 @@ namespace XyzCpp {
 		}
 
 		void handleReceiveError () {
-			std::cout << "RECEIVE ERROR!\n";
 			resetState();
 			invokeOnDisconnect();
 		}

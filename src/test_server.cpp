@@ -109,8 +109,6 @@ int main () {
 		client.read();
 	};
 
-	char* value;
-	while ((value = readline("Input> "))) {
-		std::cout << "I hate '" << value << "'\n";
-	}
+	char line[2048];
+	while (std::cin.getline(line, 2048)) {}
 }
