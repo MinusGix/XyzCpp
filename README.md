@@ -6,4 +6,3 @@ Uses:
 - boost.iostreams (deflation/inflation with zlib module)
 - zlib
 - openssl (for sha256, and md5, TODO: find standalone libraries for these)
-- libecc (for ecdh, openssl documentation for ECDH is *awful*)
