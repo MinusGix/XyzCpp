@@ -4,7 +4,7 @@
 
 #include "XyzMessage.hpp"
 
-namespace XyzMessageDecoder {
+namespace XyzCpp {
 	class XyzMessageDecoder {
 		public:
 
