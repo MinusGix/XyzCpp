@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include <array>
+#include <variant>
 
 #include <stdio.h>
 #include <string.h>
@@ -218,6 +219,50 @@ namespace XyzCpp {
 		/// Thrown when there isn't enough bytes for an operation.
 		struct InsufficientBytes : public std::runtime_error {
 			explicit InsufficientBytes (std::string message) : std::runtime_error("Insufficient Bytes: " + message) {}
+		};
+
+		/// An strange struct to hold the error within it.
+		/// This has to hold every possible exception that could be thrown, and copy them *properly*
+		/// (if we just listened for a )
+		struct Error {
+			/// Unknown error tag, use this when you, well, don't have a good idea what the error is.
+			struct Unknown {};
+			std::variant<
+				std::exception_ptr,
+				boost::system::error_code,
+				std::string,
+				Unknown
+			> error;
+
+			Error (std::exception_ptr e_ptr) : error(e_ptr) {}
+			Error (boost::system::error_code ec) : error(ec) {}
+			Error (std::string str) : error(str) {}
+			Error (Unknown u) : error (u) {}
+			
+			std::string toString () const {
+				if (std::holds_alternative<std::exception_ptr>(error)) {
+					try {
+						// We have to rethrow the exception if we want to access it again.
+						std::rethrow_exception(std::get<std::exception_ptr>(error));
+					} catch (std::exception& e) {
+						// We know how to handle a std::exception, so we get it's error string
+						return e.what();
+					} catch (int i) {
+						// Perhaps some status code? This isn't likely.
+						return std::to_string(i);
+					} catch (...) {
+						// No clue what the error is.
+						return "Unknown Error";
+					}
+				} else if (std::holds_alternative<boost::system::error_code>(error)) {
+					boost::system::error_code ec = std::get<boost::system::error_code>(error);
+					return ec.message();
+				} else if (std::holds_alternative<std::string>(error)) {
+            		return std::get<std::string>(error);
+				} else {
+					return "Unknown Error";
+				}
+			}
 		};
 
 		// ==== Deflate / Inflate ====

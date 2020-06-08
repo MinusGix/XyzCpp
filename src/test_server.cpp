@@ -102,8 +102,8 @@ int main () {
 			}
 		};
 
-		client.onDisconnect = [&connection] () {
-			std::cout << "[Info] Client disconnected\n";
+		client.onDisconnect = [&connection] (XyzCpp::XyzUtils::Error error) {
+			std::cout << "[Info] Client disconnected: " << error.toString() << "\n";
 		};
 
 		client.read();

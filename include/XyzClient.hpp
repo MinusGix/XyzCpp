@@ -102,7 +102,7 @@ namespace XyzCpp {
 		public:
 		
 		std::function<void(void)> onConnect;
-		std::function<void(void)> onDisconnect;
+		std::function<void(XyzUtils::Error)> onDisconnect;
 		std::function<void(std::vector<std::byte>, int)> onMessage;
 
 		/// Default constructor. Call [connect] to connect to a specific server.
@@ -123,7 +123,7 @@ namespace XyzCpp {
 		void disconnect (bool forced=false) {
 			if (forced || client.isConnected()) {
 				client.close();
-				invokeOnDisconnect();
+				invokeOnDisconnect(XyzUtils::Error(XyzUtils::Error::Unknown{}));
 			}
 		}
 
@@ -138,8 +138,8 @@ namespace XyzCpp {
 
 				read();
 				return true;
-			} catch (std::exception& err) { // TODO: Doesn't inform the user of any errors@He
-				invokeOnDisconnect();
+			} catch (...) { // TODO: Doesn't inform the user of any errors@He
+				invokeOnDisconnect(XyzUtils::Error(std::current_exception()));
 			}
 			return false;
 		}
@@ -181,7 +181,8 @@ namespace XyzCpp {
 
 				client.writeAsync(boost::asio::buffer(payload), [this] (boost::system::error_code ec, size_t length) {
 					if (ec) {
-						this->handleError();
+						this->handleError(XyzUtils::Error(ec));
+						return;
 					}
 				});
 			} catch (...) {} // TODO: handle error?
@@ -236,7 +237,7 @@ namespace XyzCpp {
 
 		void receivedLength (boost::system::error_code ec, size_t received_length, std::shared_ptr<TempMessage> temp_message) {
 			if (ec) {
-				handleError();
+				handleError(XyzUtils::Error(ec));
 				return;
 			}
 
@@ -259,13 +260,13 @@ namespace XyzCpp {
 					this->receivedType(ec, t_received_length, temp_message);
 				});
 			} catch (...) { // TODO: handle error properly?
-				handleError();
+				handleError(XyzUtils::Error(std::current_exception()));
 			}
 		}
 
 		void receivedType (boost::system::error_code ec, size_t received_length, std::shared_ptr<TempMessage> temp_message) {
 			if (ec) {
-				handleError();
+				handleError(XyzUtils::Error(ec));
 				return;
 			}
 
@@ -282,13 +283,13 @@ namespace XyzCpp {
 					this->receivedMessage(ec, t_received_length, temp_message);
 				});
 			} catch (...) { // TODO: handle error properly?
-				handleError();
+				handleError(XyzUtils::Error(std::current_exception()));
 			}
 		}
 
 		void receivedMessage (boost::system::error_code ec, size_t received_length, std::shared_ptr<TempMessage> temp_message) {
 			if (ec) {
-				handleError();
+				handleError(XyzUtils::Error(ec));
 				return;
 			}
 
@@ -299,12 +300,12 @@ namespace XyzCpp {
 
 				readLength();
 			} catch (...) { // TODO: handle error properly?
-				handleError();
+				handleError(XyzUtils::Error(std::current_exception()));
 			}
 		}
 
-		void handleError () {
-			invokeOnDisconnect();
+		void handleError (XyzUtils::Error error) {
+			invokeOnDisconnect(error);
 		}
 
 		void invokeOnConnect () {
@@ -313,9 +314,9 @@ namespace XyzCpp {
 			}
 		}
 
-		void invokeOnDisconnect () {
+		void invokeOnDisconnect (XyzUtils::Error error) {
 			if (onDisconnect) {
-				onDisconnect();
+				onDisconnect(error);
 			}
 		}
 

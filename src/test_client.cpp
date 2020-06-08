@@ -62,8 +62,8 @@ int main (int argc, char** argv) {
 		std::cout << "[client] Client connected to server\n";
 		client.send(key_exchange.getLocalPublicKey(), 2); // public key exchange
 	};
-	client.onDisconnect = [] () {
-		std::cout << "[client] Disconnected\n";
+	client.onDisconnect = [] (XyzUtils::Error error) {
+		std::cout << "[client] Disconnected: " << error.toString() << "\n";
 	};
 	client.onMessage = [&key_exchange, &client, &shared_key, &sent_test_echo] (std::vector<std::byte> data, int type) {
 		std::cout << "[client received] " << type << ": ";
