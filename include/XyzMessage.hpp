@@ -68,13 +68,25 @@ namespace XyzCpp {
 			return type;
 		}
 
+		/// Reads a u32 at [i]
+		/// Throws an error if there isn't enough bytes (4) for a U32.
 		uint32_t asU32 (size_t i=0) const {
-			// TODO: what should this return if there isn't enough values?
+			// 8 bytes [0 1 2 3 4 5 6 7]
+			// at position 4: [4 5 6 7], valid
+			// at position 5: [5 6 7], invalid
+			if (data.size() <= (i + 3)) {
+				throw XyzUtils::InsufficientBytes("For reading as uint32");
+			}
 			return XyzUtils::detail::asU32(data.at(i+3), data.at(i+2), data.at(i+1), data.at(i));
 		}
 
+		/// Reads a u64 at [i]
+		/// Throws an error if there isn't enough bytes (8) for a U64
 		uint64_t asU64 (size_t i=0) const {
-			// TODO: what should this return if there isn't enough values?
+			if (data.size() <= (i + 7)) {
+				throw XyzUtils::InsufficientBytes("For reading as uint64");
+			}
+
 			return XyzUtils::detail::asU64(
 				data.at(i+7), data.at(i+6), data.at(i+5), data.at(i+4), data.at(i+3), data.at(i+2), data.at(i+1), data.at(i)
 			);
@@ -137,6 +149,7 @@ namespace XyzCpp {
 		}
 
 		/// Warning potentially expensive operation
+		/// May throw an error if it tries reading a u32 and the remaining data is insufficient
 		std::vector<uint32_t> asU32s () const {
 			std::vector<uint32_t> result;
 			result.reserve(data.size() / sizeof(uint32_t));
@@ -149,6 +162,7 @@ namespace XyzCpp {
 		}
 
 		/// Warning potentially expensive operation
+		/// May throw an error if it tries reading a u32 and the remaining data is insufficient
 		std::vector<uint64_t> asU64s () const {
 			std::vector<uint64_t> result;
 			result.reserve(data.size() / sizeof(uint64_t));

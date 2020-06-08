@@ -213,6 +213,13 @@ namespace XyzCpp {
 			
 		}
 
+		// ==== Errors ====
+		
+		/// Thrown when there isn't enough bytes for an operation.
+		struct InsufficientBytes : public std::runtime_error {
+			explicit InsufficientBytes (std::string message) : std::runtime_error("Insufficient Bytes: " + message) {}
+		};
+
 		// ==== Deflate / Inflate ====
 		// Compression method used on all messages
 

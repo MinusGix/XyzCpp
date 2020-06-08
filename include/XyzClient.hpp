@@ -244,7 +244,7 @@ namespace XyzCpp {
 				// Fail if there's not enough bytes for a four byte integer (BitConverter.toInt32 does this)
 				// (Though, we're using an array, so it's always filled, so we used the received_length variable to know what values are valid)
 				if (received_length < 4) {
-					throw std::runtime_error("Failed to convert to int32, not enough bytes");
+					throw XyzUtils::InsufficientBytes("For reading four bytes for message length");
 				}
 
 				// Convert bytes read into temp buffer into a uint32_t
@@ -272,7 +272,7 @@ namespace XyzCpp {
 			try {
 				// Fail if not enough bytes for the byte of [type]
 				if (received_length < 1) {
-					throw std::runtime_error("Failed to convert to byte, no bytes");
+					throw XyzUtils::InsufficientBytes("For reading single byte for message type");
 				}
 
 				// TODO: throw error if it can't acccess
