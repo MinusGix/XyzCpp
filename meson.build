@@ -11,14 +11,25 @@ cxx = meson.get_compiler('cpp')
 thread_dep = dependency('threads')
 zlib_dep = dependency('zlib')
 # it was not being found via normal means on my system
-boost_iostreams_dependency = cxx.find_library('boost_iostreams')
+boost_dep = dependency('boost', modules : ['iostreams'])
 openssl_dep = dependency('openssl')
+ws2_32_dep = []
+wsock32_dep = []
+mswsock_dep = []
+if host_machine.system() == 'windows'
+    ws2_32_dep = meson.get_compiler('c').find_library('ws2_32')
+    wsock_dep = meson.get_compiler('c').find_library('wsock32')
+    mswsock_dep = meson.get_compiler('c').find_library('mswsock')
+endif
 deps = [
     thread_dep,
     zlib_dep,
     dependency('readline'),
-    boost_iostreams_dependency,
+    boost_dep,
     openssl_dep,
+    ws2_32_dep,
+    wsock32_dep,
+    mswsock_dep
 ]
 
 src = []
