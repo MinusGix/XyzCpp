@@ -130,7 +130,7 @@ namespace XyzCpp {
 				result.resize(size);
 
 
-				// TODO: get this in a more efficient method, or get it once then never again
+				// this isn't the most efficient method of getting it, but it works
 				const EVP_MD* md = EVP_get_digestbyname(evp_name);
 				if (md == nullptr) {
 					throw std::runtime_error("Failed to get MD5 digest");
@@ -188,7 +188,6 @@ namespace XyzCpp {
 				);
 
 				if (status == 0) {
-					// TODO: custom error
 					throw std::runtime_error("PBKDF2 Failure");
 				}
 

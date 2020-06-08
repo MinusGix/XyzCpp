@@ -98,10 +98,10 @@ int main (int argc, char** argv) {
 		std::cout << "Failed to connect\n";
 	}
 
-	char line[2048];
-	while (std::cin.getline(line, 2048)) {
+	std::string line;
+	while (std::getline(std::cin, line)) {
 		if (shared_key.size() != 0) {
-			client.send(XyzUtils::encrypt(reinterpret_cast<std::byte*>(line), strlen(line), shared_key.data(), shared_key.size()), 3);
+			client.send(XyzUtils::encrypt(reinterpret_cast<std::byte*>(line.data()), line.size(), shared_key.data(), shared_key.size()), 3);
 		} else {
 			std::cout << "Haven't exchange public keys\n";
 		}

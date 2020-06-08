@@ -93,9 +93,9 @@ namespace XyzCpp {
 		}
 
 		/// Warning: potentially expensive operation
+		/// Note: this isn't completely accurate to the original, as I don't know any way of checking for utf8 validity.
 		std::string asString () const {
 			if (data.size() == 0) {
-				// TODO: should this error?
 				return "";
 			}
 
@@ -128,7 +128,6 @@ namespace XyzCpp {
 			}
 
 			// If we were parsing a string, but then it ended before we found the null byte, add it anyway.
-			// TODO: should this error?
 			if (consuming) {
 				result.push_back(std::move(current));
 			}

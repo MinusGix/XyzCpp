@@ -236,6 +236,8 @@ namespace XyzCpp {
 
 		EVP_PKEY* peer_public_key = nullptr;
 
+		std::optional<std::vector<std::byte>> shared_secret;
+
 		public:
 
 		/// A class for creating a private and public key, receiving a remote-peer key, and generating a shared secret.
@@ -252,6 +254,8 @@ namespace XyzCpp {
 		/// Set the peer's public key. This is their public key which allows you to generate the shared-secret-key which you can use for
 		/// more secure communication.
 		void setRemotePublicKey (std::vector<std::byte> t_remote_public_key) {
+			shared_secret = std::nullopt;
+
 			// Remove the header of [ECK5][Key-part size]
 			t_remote_public_key.erase(t_remote_public_key.begin() + 0, t_remote_public_key.begin() + 8);
 			// Add the uncompressed byte that OpenSSL includes in the data
@@ -259,11 +263,13 @@ namespace XyzCpp {
 			peer_public_key = detail::convertBytesToKey(t_remote_public_key.data(), t_remote_public_key.size());
 		}
 
-		// TODO: cache this?
 		/// Generate the shared secret key. This is what you would use for encrypting/decrypting data.
 		std::vector<std::byte> getSharedSecretKey () {
-			std::vector<std::byte> shared = detail::deriveShared(peer_public_key, private_key);
-			return XyzUtils::SHA256Bytes(shared.data(), shared.size());
+			if (!shared_secret.has_value()) {
+				std::vector<std::byte> data = detail::deriveShared(peer_public_key, private_key);
+				shared_secret = XyzUtils::SHA256Bytes(data.data(), data.size());	
+			}
+			return shared_secret.value();
 		}
 	};
 }

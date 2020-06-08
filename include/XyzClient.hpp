@@ -138,7 +138,7 @@ namespace XyzCpp {
 
 				read();
 				return true;
-			} catch (...) { // TODO: Doesn't inform the user of any errors@He
+			} catch (...) {
 				invokeOnDisconnect(XyzUtils::Error(std::current_exception()));
 			}
 			return false;
@@ -259,7 +259,7 @@ namespace XyzCpp {
 				client.readAsync(boost::asio::buffer(buf.data(), type_size), [this, temp_message] (boost::system::error_code ec, size_t t_received_length) {
 					this->receivedType(ec, t_received_length, temp_message);
 				});
-			} catch (...) { // TODO: handle error properly?
+			} catch (...) {
 				handleError(XyzUtils::Error(std::current_exception()));
 			}
 		}
@@ -276,13 +276,12 @@ namespace XyzCpp {
 					throw XyzUtils::InsufficientBytes("For reading single byte for message type");
 				}
 
-				// TODO: throw error if it can't acccess
 				temp_message->type = static_cast<int>(temp_message->buf.at(0));
 
 				client.readAsync(boost::asio::buffer(temp_message->message.data(), temp_message->length), [this, temp_message] (boost::system::error_code ec, size_t t_received_length) {
 					this->receivedMessage(ec, t_received_length, temp_message);
 				});
-			} catch (...) { // TODO: handle error properly?
+			} catch (...) {
 				handleError(XyzUtils::Error(std::current_exception()));
 			}
 		}
@@ -299,7 +298,7 @@ namespace XyzCpp {
 				invokeOnMessage(std::move(deflated), temp_message->type);
 
 				readLength();
-			} catch (...) { // TODO: handle error properly?
+			} catch (...) {
 				handleError(XyzUtils::Error(std::current_exception()));
 			}
 		}

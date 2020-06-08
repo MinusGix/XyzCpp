@@ -109,6 +109,9 @@ int main () {
 		client.read();
 	};
 
-	char line[2048];
-	while (std::cin.getline(line, 2048)) {}
+	// Keep the program alive
+	char c;
+	while (true) {
+		std::cin.get(c);
+	}
 }

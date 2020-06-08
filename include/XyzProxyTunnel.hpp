@@ -11,7 +11,7 @@ namespace XyzCpp {
 	class XyzProxyTunnel {
 		protected:
 
-		// TODO: this is ew to have to wrap this in an optional
+		// this is unfortunate to have to wrap this in an optional
 		std::optional<XyzServer> server;
 
 		int listen_port;
