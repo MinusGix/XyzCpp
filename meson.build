@@ -24,7 +24,6 @@ endif
 deps = [
     thread_dep,
     zlib_dep,
-    dependency('readline'),
     boost_dep,
     openssl_dep,
     ws2_32_dep,
